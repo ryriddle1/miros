@@ -1,8 +1,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
+  const { addToCart, formatPrice } = useCart();
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation(); // Чтобы не переходило на страницу товара
+    addToCart(product);
+    alert(`✅ ${product.name} добавлен в корзину!`);
+  };
 
   const cardStyle = {
     border: '1px solid #e0e0e0',
@@ -34,10 +42,22 @@ const ProductCard = ({ product }) => {
     fontWeight: 'bold'
   };
 
+  const buttonStyle = {
+    width: '100%',
+    padding: '10px',
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    fontSize: '14px',
+    cursor: 'pointer',
+    marginTop: '10px',
+    transition: 'background-color 0.3s'
+  };
+
   return (
     <div 
       style={cardStyle}
-      onClick={() => navigate(`/product/${product.id}`)}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
         e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
@@ -51,10 +71,20 @@ const ProductCard = ({ product }) => {
         src={product.image || 'https://via.placeholder.com/200'} 
         alt={product.name}
         style={imageStyle}
+        onClick={() => navigate(`/product/${product.id}`)}
       />
-      <h3 style={titleStyle}>{product.name}</h3>
-      <p style={priceStyle}>{product.price} ₽</p>
-      <p>{product.description}</p>
+      <h3 style={titleStyle} onClick={() => navigate(`/product/${product.id}`)}>
+        {product.name}
+      </h3>
+      <p style={priceStyle}>{formatPrice(product.price)}</p>
+      <button 
+        style={buttonStyle}
+        onClick={handleAddToCart}
+        onMouseEnter={(e) => e.target.style.backgroundColor = '#0056b3'}
+        onMouseLeave={(e) => e.target.style.backgroundColor = '#007bff'}
+      >
+        🛒 В корзину
+      </button>
     </div>
   );
 };

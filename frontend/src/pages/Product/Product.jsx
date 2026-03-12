@@ -1,13 +1,14 @@
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useCart } from '../../context/CartContext';
 import { products } from '../../data/products';
 import Button from '../../components/Button/Button';
 
 const Product = () => {
-  const { id } = useParams(); // Получаем ID товара из адреса
+  const { id } = useParams();
   const navigate = useNavigate();
+  const { addToCart, formatPrice } = useCart();
   
-  // Ищем товар по ID
   const product = products.find(p => p.id === parseInt(id));
 
   if (!product) {
@@ -20,6 +21,11 @@ const Product = () => {
       </div>
     );
   }
+
+  const handleAddToCart = () => {
+    addToCart(product);
+    alert(`✅ ${product.name} добавлен в корзину!`);
+  };
 
   const containerStyle = {
     maxWidth: '1000px',
@@ -48,6 +54,12 @@ const Product = () => {
     margin: '20px 0'
   };
 
+  const buttonGroupStyle = {
+    display: 'flex',
+    gap: '15px',
+    marginTop: '30px'
+  };
+
   return (
     <div style={containerStyle}>
       <Button onClick={() => navigate('/catalog')}>
@@ -63,19 +75,19 @@ const Product = () => {
         
         <div>
           <h1>{product.name}</h1>
-          <p style={priceStyle}>{product.price} ₽</p>
+          <p style={priceStyle}>{formatPrice(product.price)}</p>
           <p style={{ fontSize: '16px', lineHeight: '1.6' }}>
             {product.description}
           </p>
-          <Button 
-            onClick={() => {
-              alert(`Товар "${product.name}" добавлен в корзину!`);
-              // Позже здесь будет реальное добавление в корзину
-            }}
-            style={{ marginTop: '20px' }}
-          >
-            Добавить в корзину
-          </Button>
+          
+          <div style={buttonGroupStyle}>
+            <Button onClick={handleAddToCart}>
+              🛒 Добавить в корзину
+            </Button>
+            <Button onClick={() => navigate('/cart')}>
+              Перейти в корзину
+            </Button>
+          </div>
         </div>
       </div>
     </div>
