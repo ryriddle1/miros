@@ -1,38 +1,67 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Button from '../../components/Button/Button';
+import styles from './Home.module.css';
 
 const Home = () => {
   const navigate = useNavigate();
 
-  const pageStyle = {
-    minHeight: '100vh',
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    textAlign: 'center',
-    padding: '20px',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-    color: 'white'
-  };
-
-  const titleStyle = {
-    fontSize: '3rem',
-    marginBottom: '20px',
-    animation: 'fadeIn 2s'
-  };
+  const features = [
+    {
+      icon: '🚚',
+      title: 'Бесплатная доставка',
+      description: 'При заказе от 5000 ₽'
+    },
+    {
+      icon: '💰',
+      title: 'Гарантия лучшей цены',
+      description: 'Найдете дешевле - вернем разницу'
+    },
+    {
+      icon: '🛡️',
+      title: 'Гарантия качества',
+      description: 'Только оригинальная продукция'
+    },
+    {
+      icon: '⚡',
+      title: 'Быстрая доставка',
+      description: 'Отправка в день заказа'
+    }
+  ];
 
   return (
-    <div style={pageStyle}>
-      <h1 style={titleStyle}>Добро пожаловать в магазин!</h1>
-      <p style={{ fontSize: '1.2rem', marginBottom: '30px' }}>
-        Лучшие товары по лучшим ценам
-      </p>
-      <Button onClick={() => navigate('/catalog')}>
-        Перейти в каталог
-      </Button>
-    </div>
+    <>
+      <section className={styles.hero}>
+        <div className={styles.heroContent}>
+          <h1 className={styles.title}>
+            Добро пожаловать в miros
+          </h1>
+          <p className={styles.subtitle}>
+            Дизайн — бомба, начинка — ядерная.
+          </p>
+          <button 
+            className={styles.ctaButton}
+            onClick={() => navigate('/catalog')}
+          >
+            Начать покупки →
+          </button>
+        </div>
+      </section>
+
+      <section className={styles.features}>
+        <h2 className={styles.featuresTitle}>
+          Почему выбирают нас?
+        </h2>
+        <div className={styles.featuresGrid}>
+          {features.map((feature, index) => (
+            <div key={index} className={styles.featureCard}>
+              <div className={styles.featureIcon}>{feature.icon}</div>
+              <h3 className={styles.featureTitle}>{feature.title}</h3>
+              <p className={styles.featureDescription}>{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
   );
 };
 
