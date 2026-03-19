@@ -35,7 +35,7 @@ const Header = () => {
             Каталог
           </NavLink>
 
-          {/* ✅ Новая ссылка на сервисный центр */}
+          {/* Ссылка на сервисный центр */}
           <NavLink 
             to="/service" 
             className={({ isActive }) => 
@@ -43,6 +43,16 @@ const Header = () => {
             }
           >
             🔧 Сервис
+          </NavLink>
+
+          {/* ✅ Новая ссылка на конструктор ПК */}
+          <NavLink 
+            to="/pc-builder" 
+            className={({ isActive }) => 
+              isActive ? `${styles.navLink} ${styles.activeNavLink}` : styles.navLink
+            }
+          >
+            🖥️ Конструктор ПК
           </NavLink>
 
           {user && (

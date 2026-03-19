@@ -8,7 +8,6 @@ const Service = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  // ✅ Хук useService() должен быть ВНУТРИ компонента
   const { 
     requests, 
     loading, 
@@ -49,6 +48,7 @@ const Service = () => {
   }
 
   const stats = getStats();
+  const filteredRequests = getFilteredRequests();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -81,26 +81,24 @@ const Service = () => {
 
   const getUrgencyLabel = (urgency) => {
     const labels = {
-      low: 'Низкий',
-      normal: 'Средний',
-      high: 'Высокий',
-      urgent: 'Срочно'
+      low: 'Низкая',
+      normal: 'Средняя',
+      high: 'Высокая',
+      urgent: 'Срочная'
     };
     return labels[urgency] || labels.normal;
   };
-
-  const filteredRequests = getFilteredRequests();
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h1 className={styles.title}>🔧 Сервисный центр</h1>
         <p className={styles.subtitle}>
-          Оставьте заявку на ремонт и отслеживайте статус выполнения
+          {user?.name}, здесь вы можете отслеживать свои заявки на ремонт
         </p>
       </div>
 
-      {/* Статистика */}
+      {/* Статистика пользователя */}
       <div className={styles.statsGrid}>
         <div className={styles.statCard}>
           <div className={styles.statValue}>{stats.total}</div>
@@ -255,7 +253,7 @@ const Service = () => {
         </div>
       )}
 
-      {/* Список заявок */}
+      {/* Список заявок пользователя */}
       <div className={styles.requestsList}>
         {loading ? (
           <div className={styles.loading}>Загрузка...</div>

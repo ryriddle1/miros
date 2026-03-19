@@ -1,0 +1,492 @@
+.container {
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.title {
+  font-size: 3rem;
+  color: #333;
+  margin-bottom: 1rem;
+  background: linear-gradient(135deg, #1e8449 0%, #0e6251 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.builderLayout {
+  display: grid;
+  grid-template-columns: 1fr 350px;
+  gap: 2rem;
+}
+
+/* Левая панель */
+.componentsPanel {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+}
+
+.panelHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.panelHeader h2 {
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.headerActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.newBuildButton {
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #1e8449 0%, #0e6251 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.saveBuildButton {
+  padding: 0.5rem 1rem;
+  background: #ffc107;
+  color: #333;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.saveBuildButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+}
+
+.componentsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.componentItem {
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.componentHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.componentName {
+  font-weight: bold;
+  color: #333;
+}
+
+.selectButton {
+  padding: 0.3rem 1rem;
+  background: #1e8449;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.selectButton:hover {
+  background: #0e6251;
+  transform: scale(1.05);
+}
+
+.selectedComponent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: white;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.componentPrice {
+  color: #1e8449;
+  font-weight: bold;
+}
+
+.emptyComponent {
+  padding: 0.5rem;
+  color: #999;
+  font-style: italic;
+  background: white;
+  border-radius: 8px;
+}
+
+.emptyBuild {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+}
+
+.startBuildButton {
+  margin-top: 1rem;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #1e8449 0%, #0e6251 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+
+.startBuildButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 20px rgba(30, 132, 73, 0.3);
+}
+
+/* Правая панель */
+.infoPanel {
+  background: white;
+  border-radius: 15px;
+  padding: 1.5rem;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  height: fit-content;
+  position: sticky;
+  top: 100px;
+}
+
+.totalPrice {
+  text-align: center;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #1e8449 0%, #0e6251 100%);
+  border-radius: 10px;
+  color: white;
+  margin-bottom: 1.5rem;
+}
+
+.totalPrice h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+
+.priceValue {
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.compatibility {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.compatibility h3 {
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.compatible {
+  color: #28a745;
+  font-weight: 500;
+}
+
+.warnings {
+  color: #dc3545;
+}
+
+.warning {
+  margin: 0.3rem 0;
+  font-size: 0.9rem;
+}
+
+.aiSection {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.aiSection h3 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.aiButton {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.aiButton:hover {
+  transform: scale(1.02);
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.aiButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.aiSuggestions {
+  margin-top: 1rem;
+}
+
+.aiSuggestion {
+  padding: 0.8rem;
+  background: white;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.aiSuggestion strong {
+  color: #1e8449;
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.aiSuggestion p {
+  color: #666;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.savedBuilds {
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.savedBuilds h3 {
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.buildsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.buildItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem;
+  background: white;
+  border-radius: 8px;
+}
+
+.buildInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.buildInfo strong {
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.buildInfo span {
+  color: #1e8449;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.buildActions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.loadBuildButton {
+  padding: 0.3rem 0.8rem;
+  background: #1e8449;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.deleteBuildButton {
+  padding: 0.3rem 0.5rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+/* Модальное окно */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+}
+
+.modal h3 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.modalInput {
+  width: 100%;
+  padding: 0.8rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.modalInput:focus {
+  outline: none;
+  border-color: #1e8449;
+  box-shadow: 0 0 0 3px rgba(30, 132, 73, 0.1);
+}
+
+.modalActions {
+  display: flex;
+  gap: 1rem;
+}
+
+.modalSaveButton {
+  flex: 1;
+  padding: 0.8rem;
+  background: linear-gradient(135deg, #1e8449 0%, #0e6251 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.modalCancelButton {
+  flex: 1;
+  padding: 0.8rem;
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+/* Неавторизованный доступ */
+.unauthorized {
+  text-align: center;
+  padding: 4rem;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.unauthorized h2 {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.unauthorized p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.loginButton {
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #1e8449 0%, #0e6251 100%);
+  color: white;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.loginButton:hover {
+  transform: scale(1.05);
+  box-shadow: 0 5px 20px rgba(30, 132, 73, 0.3);
+}
+
+@media (max-width: 1024px) {
+  .builderLayout {
+    grid-template-columns: 1fr;
+  }
+  
+  .infoPanel {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .panelHeader {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .headerActions {
+    width: 100%;
+  }
+  
+  .newBuildButton,
+  .saveBuildButton {
+    flex: 1;
+  }
+}

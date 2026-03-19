@@ -28,9 +28,17 @@ const Home = () => {
     }
   ];
 
+  // 20 мятных долек
+  const slices = Array.from({ length: 20 }, (_, i) => i + 1);
+
   return (
     <>
       <section className={styles.hero}>
+        {/* Дождь из мятных долек */}
+        {slices.map(num => (
+          <div key={num} className={`${styles.limeSlice} ${styles[`slice${num}`]}`}></div>
+        ))}
+
         <div className={styles.heroContent}>
           <h1 className={styles.title}>
             Добро пожаловать в miros

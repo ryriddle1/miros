@@ -13,32 +13,38 @@ export const useService = () => {
 
 export const ServiceProvider = ({ children }) => {
   const { user } = useAuth();
-  const [requests, setRequests] = useState([]);
+  const [allRequests, setAllRequests] = useState({}); // Объект с заявками для всех пользователей
   const [loading, setLoading] = useState(false);
-  const [filter, setFilter] = useState('all'); // all, active, completed
+  const [filter, setFilter] = useState('all');
 
-  // Загружаем заявки из localStorage при запуске
+  // Загружаем все заявки из localStorage при запуске
   useEffect(() => {
-    if (user) {
-      const savedRequests = localStorage.getItem(`service_requests_${user.id}`);
-      if (savedRequests) {
-        setRequests(JSON.parse(savedRequests));
-      }
+    const savedRequests = localStorage.getItem('all_service_requests');
+    if (savedRequests) {
+      setAllRequests(JSON.parse(savedRequests));
+    } else {
+      // Если нет, создаем пустой объект
+      setAllRequests({});
     }
-  }, [user]);
+  }, []);
 
-  // Сохраняем заявки в localStorage
+  // Сохраняем все заявки в localStorage при изменении
   useEffect(() => {
-    if (user && requests.length > 0) {
-      localStorage.setItem(`service_requests_${user.id}`, JSON.stringify(requests));
+    if (Object.keys(allRequests).length > 0) {
+      localStorage.setItem('all_service_requests', JSON.stringify(allRequests));
     }
-  }, [requests, user]);
+  }, [allRequests]);
+
+  // Получаем заявки только текущего пользователя
+  const getUserRequests = () => {
+    if (!user) return [];
+    return allRequests[user.id] || [];
+  };
 
   // Создание новой заявки
   const createRequest = (requestData) => {
     setLoading(true);
     
-    // Имитация отправки на сервер
     return new Promise((resolve) => {
       setTimeout(() => {
         const newRequest = {
@@ -47,7 +53,7 @@ export const ServiceProvider = ({ children }) => {
           userId: user.id,
           userName: user.name,
           userEmail: user.email,
-          status: 'pending', // pending, in_progress, completed, cancelled
+          status: 'pending',
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
           history: [
@@ -59,7 +65,12 @@ export const ServiceProvider = ({ children }) => {
           ]
         };
 
-        setRequests(prev => [newRequest, ...prev]);
+        // Добавляем заявку только для текущего пользователя
+        setAllRequests(prev => ({
+          ...prev,
+          [user.id]: [...(prev[user.id] || []), newRequest]
+        }));
+
         setLoading(false);
         resolve(newRequest);
       }, 1000);
@@ -68,46 +79,65 @@ export const ServiceProvider = ({ children }) => {
 
   // Обновление статуса заявки
   const updateRequestStatus = (requestId, newStatus, comment = '') => {
-    setRequests(prev => prev.map(request => {
-      if (request.id === requestId) {
-        const updatedRequest = {
-          ...request,
-          status: newStatus,
-          updatedAt: new Date().toISOString(),
-          history: [
-            ...request.history,
-            {
-              status: newStatus,
-              date: new Date().toISOString(),
-              comment
-            }
-          ]
-        };
-        return updatedRequest;
-      }
-      return request;
-    }));
+    if (!user) return;
+
+    setAllRequests(prev => {
+      const userRequests = prev[user.id] || [];
+      const updatedRequests = userRequests.map(request => {
+        if (request.id === requestId) {
+          return {
+            ...request,
+            status: newStatus,
+            updatedAt: new Date().toISOString(),
+            history: [
+              ...request.history,
+              {
+                status: newStatus,
+                date: new Date().toISOString(),
+                comment
+              }
+            ]
+          };
+        }
+        return request;
+      });
+
+      return {
+        ...prev,
+        [user.id]: updatedRequests
+      };
+    });
   };
 
   // Добавление комментария к заявке
   const addComment = (requestId, comment) => {
-    setRequests(prev => prev.map(request => {
-      if (request.id === requestId) {
-        return {
-          ...request,
-          updatedAt: new Date().toISOString(),
-          history: [
-            ...request.history,
-            {
-              status: 'comment',
-              date: new Date().toISOString(),
-              comment
-            }
-          ]
-        };
-      }
-      return request;
-    }));
+    if (!user) return;
+
+    setAllRequests(prev => {
+      const userRequests = prev[user.id] || [];
+      const updatedRequests = userRequests.map(request => {
+        if (request.id === requestId) {
+          return {
+            ...request,
+            updatedAt: new Date().toISOString(),
+            history: [
+              ...request.history,
+              {
+                status: 'comment',
+                date: new Date().toISOString(),
+                comment
+              }
+            ]
+          };
+        }
+        return request;
+      });
+
+      return {
+        ...prev,
+        [user.id]: updatedRequests
+      };
+    });
   };
 
   // Отмена заявки
@@ -115,36 +145,42 @@ export const ServiceProvider = ({ children }) => {
     updateRequestStatus(requestId, 'cancelled', 'Заявка отменена пользователем');
   };
 
-  // Получение заявки по ID
+  // Получение заявки по ID (только из заявок текущего пользователя)
   const getRequestById = (requestId) => {
-    return requests.find(r => r.id === requestId);
+    if (!user) return null;
+    const userRequests = allRequests[user.id] || [];
+    return userRequests.find(r => r.id === requestId);
   };
 
-  // Фильтрация заявок
+  // Фильтрация заявок текущего пользователя
   const getFilteredRequests = () => {
+    const userRequests = getUserRequests();
+    
     switch (filter) {
       case 'active':
-        return requests.filter(r => ['pending', 'in_progress'].includes(r.status));
+        return userRequests.filter(r => ['pending', 'in_progress'].includes(r.status));
       case 'completed':
-        return requests.filter(r => ['completed', 'cancelled'].includes(r.status));
+        return userRequests.filter(r => ['completed', 'cancelled'].includes(r.status));
       default:
-        return requests;
+        return userRequests;
     }
   };
 
-  // Статистика
+  // Статистика для текущего пользователя
   const getStats = () => {
+    const userRequests = getUserRequests();
+    
     return {
-      total: requests.length,
-      pending: requests.filter(r => r.status === 'pending').length,
-      inProgress: requests.filter(r => r.status === 'in_progress').length,
-      completed: requests.filter(r => r.status === 'completed').length,
-      cancelled: requests.filter(r => r.status === 'cancelled').length
+      total: userRequests.length,
+      pending: userRequests.filter(r => r.status === 'pending').length,
+      inProgress: userRequests.filter(r => r.status === 'in_progress').length,
+      completed: userRequests.filter(r => r.status === 'completed').length,
+      cancelled: userRequests.filter(r => r.status === 'cancelled').length
     };
   };
 
   const value = {
-    requests,
+    requests: getUserRequests(), // Только заявки текущего пользователя
     loading,
     filter,
     setFilter,
