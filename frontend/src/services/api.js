@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Базовый URL вашего API (замените на реальный адрес)
-const BASE_URL = 'https://ваш-домен.com/api/';
+const BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: BASE_URL,

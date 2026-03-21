@@ -11,8 +11,10 @@ const AuthModal = () => {
     register 
   } = useAuth();
 
-  const [name, setName] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -28,15 +30,30 @@ const AuthModal = () => {
       if (authMode === 'login') {
         await login(email, password);
       } else {
-        await register(name, email, password);
+        await register({
+          first_name: firstName,
+          last_name: lastName,
+          email,
+          phone_number: phoneNumber,
+          password
+        });
       }
       setShowAuthModal(false);
       // Очищаем форму
-      setName('');
+      setFirstName('');
+      setLastName('');
       setEmail('');
+      setPhoneNumber('');
       setPassword('');
     } catch (err) {
-      setError(err.message);
+      console.error('Auth error:', err);
+      console.log('Response data:', err.response?.data);
+      const errorMessage = err.response?.data?.message || 
+                       err.response?.data?.email?.[0] ||
+                       err.response?.data?.phone_number?.[0] ||
+                       err.response?.data?.username?.[0] ||
+                       err.message || 'Ошибка';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -139,19 +156,37 @@ const AuthModal = () => {
 
         <form onSubmit={handleSubmit}>
           {authMode === 'register' && (
-            <input
-              type="text"
-              placeholder="Имя"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              style={inputStyle}
-              required
-            />
+            <>
+              <input
+                type="text"
+                placeholder="Имя *"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                style={inputStyle}
+                required
+              />
+              <input
+                type="text"
+                placeholder="Фамилия *"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                style={inputStyle}
+                required
+              />
+              <input
+                type="tel"
+                placeholder="Телефон *"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                style={inputStyle}
+                required
+              />
+            </>
           )}
 
           <input
             type="email"
-            placeholder="Email"
+            placeholder="Email *"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             style={inputStyle}
@@ -160,7 +195,7 @@ const AuthModal = () => {
 
           <input
             type="password"
-            placeholder="Пароль"
+            placeholder="Пароль *"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             style={inputStyle}

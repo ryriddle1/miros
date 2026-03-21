@@ -5,9 +5,7 @@ const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth должен использоваться внутри AuthProvider');
-  }
+  if (!context) throw new Error('useAuth must be used within AuthProvider');
   return context;
 };
 
@@ -18,71 +16,32 @@ export const AuthProvider = ({ children }) => {
   const [authMode, setAuthMode] = useState('login');
 
   useEffect(() => {
-    // Проверяем, есть ли сохраненный пользователь при загрузке
     const savedUser = localStorage.getItem('user');
     const token = localStorage.getItem('access_token');
-    
-    if (savedUser && token) {
-      setUser(JSON.parse(savedUser));
-      // Можно также запросить свежие данные профиля
-      // authService.getProfile().then(data => setUser(data)).catch(() => logout());
-    }
+    if (savedUser && token) setUser(JSON.parse(savedUser));
     setLoading(false);
   }, []);
 
   const login = async (email, password) => {
-    try {
-      const data = await authService.login(email, password);
-      setUser(data.user);
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    const data = await authService.login(email, password);
+    setUser(data.user);
+    return data;
   };
 
   const register = async (userData) => {
-    try {
-      const data = await authService.register(userData);
-      // После регистрации можно сразу залогинить пользователя
-      return data;
-    } catch (error) {
-      throw error;
-    }
+    const data = await authService.register(userData);
+    // После регистрации автоматически логинимся
+    await login(userData.email, userData.password);
+    return data;
   };
 
   const logout = async () => {
-    try {
-      await authService.logout();
-    } finally {
-      setUser(null);
-    }
-  };
-
-  const updateProfile = async (userData) => {
-    try {
-      const updatedUser = await authService.updateProfile(userData);
-      setUser(updatedUser);
-      return updatedUser;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const value = {
-    user,
-    loading,
-    login,
-    register,
-    logout,
-    updateProfile,
-    showAuthModal,
-    setShowAuthModal,
-    authMode,
-    setAuthMode
+    await authService.logout();
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, showAuthModal, setShowAuthModal, authMode, setAuthMode }}>
       {children}
     </AuthContext.Provider>
   );

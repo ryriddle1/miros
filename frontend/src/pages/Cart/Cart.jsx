@@ -3,13 +3,13 @@ import { useCart } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
 
 const Cart = () => {
-  const { 
-    cart, 
-    removeFromCart, 
-    updateQuantity, 
-    clearCart, 
-    getTotalPrice, 
-    formatPrice 
+  const {
+    cart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    getTotalPrice,
+    formatPrice
   } = useCart();
   const navigate = useNavigate();
 
@@ -156,7 +156,7 @@ const Cart = () => {
         <div style={emptyCartStyle}>
           <h2>🛒 Корзина пуста</h2>
           <p>Добавьте товары в корзину, чтобы оформить заказ</p>
-          <button 
+          <button
             style={checkoutButtonStyle}
             onClick={() => navigate('/catalog')}
           >
@@ -171,7 +171,7 @@ const Cart = () => {
     <div style={containerStyle}>
       <div style={headerStyle}>
         <h1 style={titleStyle}>Корзина</h1>
-        <button 
+        <button
           style={clearButtonStyle}
           onClick={() => {
             if (window.confirm('Очистить корзину?')) {
@@ -186,36 +186,32 @@ const Cart = () => {
       <div>
         {cart.map(item => (
           <div key={item.id} style={cartItemStyle}>
-            <img 
-              src={item.image || 'https://via.placeholder.com/100'} 
-              alt={item.name}
+            <img
+              src={item.product.picture || 'https://via.placeholder.com/100'}
+              alt={item.product.name}
               style={itemImageStyle}
             />
-            
             <div style={itemInfoStyle}>
-              <h3 style={itemNameStyle}>{item.name}</h3>
-              <p style={itemPriceStyle}>{formatPrice(item.price)}</p>
+              <h3 style={itemNameStyle}>{item.product.name}</h3>
+              <p style={itemPriceStyle}>{formatPrice(item.product.cost)}</p>
             </div>
-
             <div style={quantityControlStyle}>
-              <button 
+              <button
                 style={quantityButtonStyle}
                 onClick={() => updateQuantity(item.id, item.quantity - 1)}
               >-</button>
               <span style={quantitySpanStyle}>{item.quantity}</span>
-              <button 
+              <button
                 style={quantityButtonStyle}
                 onClick={() => updateQuantity(item.id, item.quantity + 1)}
               >+</button>
             </div>
-
             <div>
               <p style={itemPriceStyle}>
-                {formatPrice(item.price * item.quantity)}
+                {formatPrice(item.product.cost * item.quantity)}
               </p>
             </div>
-
-            <button 
+            <button
               style={removeButtonStyle}
               onClick={() => removeFromCart(item.id)}
             >
@@ -230,15 +226,15 @@ const Cart = () => {
           Итого: {formatPrice(getTotalPrice())}
         </p>
         <div>
-          <button 
+          <button
             style={continueShoppingStyle}
             onClick={() => navigate('/catalog')}
           >
             Продолжить покупки
           </button>
-          <button 
+          <button
             style={checkoutButtonStyle}
-            onClick={() => alert('Функция оформления заказа будет добавлена позже!')}
+            onClick={() => navigate('/checkout')}
           >
             Оформить заказ
           </button>

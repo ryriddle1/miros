@@ -1,9 +1,9 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import cartService from '../services/cart.service';
+import { useAuth } from './AuthContext';
 
-// Создаем контекст
 const CartContext = createContext();
 
-// Хук для использования корзины в любом компоненте
 export const useCart = () => {
   const context = useContext(CartContext);
   if (!context) {
@@ -12,87 +12,70 @@ export const useCart = () => {
   return context;
 };
 
-// Провайдер корзины
 export const CartProvider = ({ children }) => {
+  const { user } = useAuth();
   const [cart, setCart] = useState([]);
-  const [isOpen, setIsOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  // Загружаем корзину из localStorage при запуске
   useEffect(() => {
-    const savedCart = localStorage.getItem('cart');
-    if (savedCart) {
-      setCart(JSON.parse(savedCart));
+    if (user) {
+      loadCart();
+    } else {
+      setCart([]);
     }
-  }, []);
+  }, [user]);
 
-  // Сохраняем корзину в localStorage при каждом изменении
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart));
-  }, [cart]);
-
-  // Добавление товара
-  const addToCart = (product, quantity = 1) => {
-    setCart(prevCart => {
-      // Проверяем, есть ли товар уже в корзине
-      const existingItem = prevCart.find(item => item.id === product.id);
-      
-      if (existingItem) {
-        // Если товар уже есть, увеличиваем количество
-        return prevCart.map(item =>
-          item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
-      } else {
-        // Если товара нет, добавляем новый
-        return [...prevCart, { ...product, quantity }];
-      }
-    });
+  const loadCart = async () => {
+    setLoading(true);
+    try {
+      const data = await cartService.getCart();
+      setCart(data);
+    } catch (error) {
+      console.error('Ошибка загрузки корзины:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Удаление товара
-  const removeFromCart = (productId) => {
-    setCart(prevCart => prevCart.filter(item => item.id !== productId));
-  };
-
-  // Изменение количества
-  const updateQuantity = (productId, newQuantity) => {
-    if (newQuantity < 1) {
-      removeFromCart(productId);
+  const addToCart = async (productId, quantity = 1) => {
+    if (!user) {
+      console.warn('Необходимо войти в аккаунт');
       return;
     }
-    
-    setCart(prevCart =>
-      prevCart.map(item =>
-        item.id === productId
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
-    );
+    await cartService.addItem(productId, quantity);
+    await loadCart();
   };
 
-  // Очистка корзины
-  const clearCart = () => {
+  const updateQuantity = async (itemId, quantity) => {
+    await cartService.updateItem(itemId, quantity);
+    await loadCart();
+  };
+
+  const removeFromCart = async (itemId) => {
+    await cartService.removeItem(itemId);
+    await loadCart();
+  };
+
+  const clearCart = async () => {
+    await cartService.clearCart();
     setCart([]);
   };
 
-  // Подсчет общей стоимости
   const getTotalPrice = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+    return cart.reduce((total, item) => total + (item.product.cost * item.quantity), 0);
   };
 
-  // Подсчет количества товаров
   const getTotalItems = () => {
     return cart.reduce((total, item) => total + item.quantity, 0);
   };
 
-  // Форматирование цены
   const formatPrice = (price) => {
     return new Intl.NumberFormat('ru-RU').format(price) + ' ₽';
   };
 
   const value = {
     cart,
+    loading,
     addToCart,
     removeFromCart,
     updateQuantity,
@@ -100,8 +83,6 @@ export const CartProvider = ({ children }) => {
     getTotalPrice,
     getTotalItems,
     formatPrice,
-    isOpen,
-    setIsOpen
   };
 
   return (

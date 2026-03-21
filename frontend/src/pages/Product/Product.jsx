@@ -1,29 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
-import { products } from '../../data/products';
 import Button from '../../components/Button/Button';
+import productsService from '../../services/products.service';
 
 const Product = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart, formatPrice } = useCart();
-  
-  const product = products.find(p => p.id === parseInt(id));
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  if (!product) {
-    return (
-      <div style={{ padding: '20px', textAlign: 'center' }}>
-        <h2>Товар не найден</h2>
-        <Button onClick={() => navigate('/catalog')}>
-          Вернуться в каталог
-        </Button>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const loadProduct = async () => {
+      try {
+        setLoading(true);
+        const data = await productsService.getProductById(id);
+        setProduct(data);
+      } catch (err) {
+        console.error('Ошибка загрузки товара:', err);
+        setError('Не удалось загрузить товар');
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) loadProduct();
+  }, [id]);
 
   const handleAddToCart = () => {
-    addToCart(product);
+    addToCart(product.id, 1);
     alert(`✅ ${product.name} добавлен в корзину!`);
   };
 
@@ -60,6 +66,21 @@ const Product = () => {
     marginTop: '30px'
   };
 
+  if (loading) {
+    return <div style={containerStyle}>Загрузка...</div>;
+  }
+
+  if (error || !product) {
+    return (
+      <div style={containerStyle}>
+        <h2>Товар не найден</h2>
+        <Button onClick={() => navigate('/catalog')}>
+          Вернуться в каталог
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div style={containerStyle}>
       <Button onClick={() => navigate('/catalog')}>
@@ -67,19 +88,14 @@ const Product = () => {
       </Button>
 
       <div style={contentStyle}>
-        <img 
-          src={product.image || 'https://via.placeholder.com/500'} 
+        <img
+          src={product.picture || 'https://via.placeholder.com/500'}
           alt={product.name}
           style={imageStyle}
         />
-        
         <div>
           <h1>{product.name}</h1>
-          <p style={priceStyle}>{formatPrice(product.price)}</p>
-          <p style={{ fontSize: '16px', lineHeight: '1.6' }}>
-            {product.description}
-          </p>
-          
+          <p style={priceStyle}>{formatPrice(product.cost)}</p>
           <div style={buttonGroupStyle}>
             <Button onClick={handleAddToCart}>
               🛒 Добавить в корзину

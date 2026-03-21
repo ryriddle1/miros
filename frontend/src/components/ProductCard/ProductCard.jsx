@@ -7,8 +7,8 @@ const ProductCard = ({ product }) => {
   const { addToCart, formatPrice } = useCart();
 
   const handleAddToCart = (e) => {
-    e.stopPropagation(); // Чтобы не переходило на страницу товара
-    addToCart(product);
+    e.stopPropagation();
+    addToCart(product.id, 1);
     alert(`✅ ${product.name} добавлен в корзину!`);
   };
 
@@ -56,7 +56,7 @@ const ProductCard = ({ product }) => {
   };
 
   return (
-    <div 
+    <div
       style={cardStyle}
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-4px)';
@@ -67,8 +67,8 @@ const ProductCard = ({ product }) => {
         e.currentTarget.style.boxShadow = 'none';
       }}
     >
-      <img 
-        src={product.image || 'https://via.placeholder.com/200'} 
+      <img
+        src={product.picture || 'https://via.placeholder.com/200'}
         alt={product.name}
         style={imageStyle}
         onClick={() => navigate(`/product/${product.id}`)}
@@ -76,8 +76,8 @@ const ProductCard = ({ product }) => {
       <h3 style={titleStyle} onClick={() => navigate(`/product/${product.id}`)}>
         {product.name}
       </h3>
-      <p style={priceStyle}>{formatPrice(product.price)}</p>
-      <button 
+      <p style={priceStyle}>{formatPrice(product.cost)}</p>
+      <button
         style={buttonStyle}
         onClick={handleAddToCart}
         onMouseEnter={(e) => e.target.style.backgroundColor = '#0056b3'}

@@ -1,20 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProductCard from '../../components/ProductCard/ProductCard';
-import { products } from '../../data/products';
+import productsService from '../../services/products.service';
 
 const Catalog = () => {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('name');
 
-  // Фильтрация товаров по поиску
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await productsService.getProducts();
+        setProducts(data);
+      } catch (error) {
+        console.error('Ошибка загрузки товаров:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProducts();
+  }, []);
+
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // Сортировка товаров
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    if (sortBy === 'price_asc') return a.price - b.price;
-    if (sortBy === 'price_desc') return b.price - a.price;
+    if (sortBy === 'price_asc') return a.cost - b.cost;
+    if (sortBy === 'price_desc') return b.cost - a.cost;
     return a.name.localeCompare(b.name);
   });
 
@@ -55,11 +70,14 @@ const Catalog = () => {
     justifyContent: 'center'
   };
 
+  if (loading) {
+    return <div style={containerStyle}>Загрузка товаров...</div>;
+  }
+
   return (
     <div style={containerStyle}>
       <div style={headerStyle}>
         <h1>Каталог товаров</h1>
-        
         <div style={{ display: 'flex', gap: '10px' }}>
           <input
             type="text"
@@ -68,9 +86,8 @@ const Catalog = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             style={searchStyle}
           />
-          
-          <select 
-            value={sortBy} 
+          <select
+            value={sortBy}
             onChange={(e) => setSortBy(e.target.value)}
             style={selectStyle}
           >

@@ -10,7 +10,6 @@ class RegisterView(generics.CreateAPIView):
     permission_classes = [permissions.AllowAny]
 
     def perform_create(self, serializer):
-        # Хешируем пароль
         user = serializer.save()
         password = self.request.data.get('password')
         if password:
