@@ -13,7 +13,7 @@ const Header = () => {
     <header className={styles.header}>
       <nav className={styles.nav}>
         <NavLink to="/" className={styles.logo}>
-          🛍️ miros
+           miros
         </NavLink>
 
         <div className={styles.navLinks}>
@@ -42,17 +42,17 @@ const Header = () => {
               isActive ? `${styles.navLink} ${styles.activeNavLink}` : styles.navLink
             }
           >
-            🔧 Сервис
+            Сервис
           </NavLink>
 
-          {/* ✅ Новая ссылка на конструктор ПК */}
+          {/* ссылка на конструктор ПК */}
           <NavLink 
             to="/pc-builder" 
             className={({ isActive }) => 
               isActive ? `${styles.navLink} ${styles.activeNavLink}` : styles.navLink
             }
           >
-            🖥️ Конструктор ПК
+            Конструктор ПК
           </NavLink>
 
           {user && (
@@ -62,7 +62,7 @@ const Header = () => {
                 isActive ? `${styles.navLink} ${styles.activeNavLink}` : styles.navLink
               }
             >
-              👤 {user.name}
+               {user.name}
             </NavLink>
           )}
 
@@ -70,7 +70,7 @@ const Header = () => {
             className={styles.cartButton}
             onClick={() => navigate('/cart')}
           >
-            🛒 Корзина
+             Корзина
             {getTotalItems() > 0 && (
               <span className={styles.cartBadge}>{getTotalItems()}</span>
             )}
