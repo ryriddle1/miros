@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import authService from '../services/auth.service';
 
 const AuthContext = createContext();
 
@@ -14,65 +15,57 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showAuthModal, setShowAuthModal] = useState(false);
-  const [authMode, setAuthMode] = useState('login'); // 'login' или 'register'
+  const [authMode, setAuthMode] = useState('login');
 
-  // Проверяем, есть ли сохраненный пользователь при загрузке
   useEffect(() => {
+    // Проверяем, есть ли сохраненный пользователь при загрузке
     const savedUser = localStorage.getItem('user');
-    if (savedUser) {
+    const token = localStorage.getItem('access_token');
+    
+    if (savedUser && token) {
       setUser(JSON.parse(savedUser));
+      // Можно также запросить свежие данные профиля
+      // authService.getProfile().then(data => setUser(data)).catch(() => logout());
     }
     setLoading(false);
   }, []);
 
-  // Функция входа
-  const login = (email, password) => {
-    // Имитация запроса к серверу
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        // Для демо принимаем любые данные
-        if (email && password) {
-          const userData = {
-            id: 1,
-            email,
-            name: email.split('@')[0],
-            avatar: 'https://via.placeholder.com/100'
-          };
-          setUser(userData);
-          localStorage.setItem('user', JSON.stringify(userData));
-          resolve(userData);
-        } else {
-          reject(new Error('Заполните все поля'));
-        }
-      }, 1000);
-    });
+  const login = async (email, password) => {
+    try {
+      const data = await authService.login(email, password);
+      setUser(data.user);
+      return data;
+    } catch (error) {
+      throw error;
+    }
   };
 
-  // Функция регистрации
-  const register = (name, email, password) => {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        if (name && email && password) {
-          const userData = {
-            id: Date.now(),
-            name,
-            email,
-            avatar: 'https://via.placeholder.com/100'
-          };
-          setUser(userData);
-          localStorage.setItem('user', JSON.stringify(userData));
-          resolve(userData);
-        } else {
-          reject(new Error('Заполните все поля'));
-        }
-      }, 1000);
-    });
+  const register = async (userData) => {
+    try {
+      const data = await authService.register(userData);
+      // После регистрации можно сразу залогинить пользователя
+      return data;
+    } catch (error) {
+      throw error;
+    }
   };
 
-  // Выход из аккаунта
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('user');
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } finally {
+      setUser(null);
+    }
+  };
+
+  const updateProfile = async (userData) => {
+    try {
+      const updatedUser = await authService.updateProfile(userData);
+      setUser(updatedUser);
+      return updatedUser;
+    } catch (error) {
+      throw error;
+    }
   };
 
   const value = {
@@ -81,6 +74,7 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    updateProfile,
     showAuthModal,
     setShowAuthModal,
     authMode,
