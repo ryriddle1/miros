@@ -2,13 +2,13 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 
 const AuthModal = () => {
-  const { 
-    showAuthModal, 
-    setShowAuthModal, 
-    authMode, 
+  const {
+    showAuthModal,
+    setShowAuthModal,
+    authMode,
     setAuthMode,
     login,
-    register 
+    register
   } = useAuth();
 
   const [firstName, setFirstName] = useState('');
@@ -39,7 +39,6 @@ const AuthModal = () => {
         });
       }
       setShowAuthModal(false);
-      // Очищаем форму
       setFirstName('');
       setLastName('');
       setEmail('');
@@ -47,12 +46,40 @@ const AuthModal = () => {
       setPassword('');
     } catch (err) {
       console.error('Auth error:', err);
-      console.log('Response data:', err.response?.data);
-      const errorMessage = err.response?.data?.message || 
-                       err.response?.data?.email?.[0] ||
-                       err.response?.data?.phone_number?.[0] ||
-                       err.response?.data?.username?.[0] ||
-                       err.message || 'Ошибка';
+      let errorMessage = 'Ошибка';
+
+      if (err.response) {
+        const status = err.response.status;
+        const data = err.response.data;
+
+        if (status === 404) {
+          errorMessage = 'Пользователь не найден';
+        } else if (status === 400) {
+          if (data && typeof data === 'object') {
+            if (data.email) errorMessage = data.email[0];
+            else if (data.phone_number) errorMessage = data.phone_number[0];
+            else if (data.username) errorMessage = data.username[0];
+            else if (data.error) errorMessage = data.error;
+            else if (data.detail) errorMessage = data.detail;
+            else errorMessage = 'Неверные данные';
+          } else if (typeof data === 'string') {
+            errorMessage = data;
+          } else {
+            errorMessage = 'Неверный запрос';
+          }
+        } else if (status === 401) {
+          errorMessage = 'Неверный email или пароль';
+        } else if (status === 500) {
+          errorMessage = 'Ошибка сервера. Попробуйте позже';
+        } else {
+          errorMessage = `Ошибка ${status}: ${data?.detail || data?.message || 'Неизвестная ошибка'}`;
+        }
+      } else if (err.request) {
+        errorMessage = 'Нет связи с сервером';
+      } else {
+        errorMessage = err.message || 'Ошибка';
+      }
+
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -141,7 +168,7 @@ const AuthModal = () => {
   return (
     <div style={modalOverlayStyle} onClick={() => setShowAuthModal(false)}>
       <div style={modalStyle} onClick={e => e.stopPropagation()}>
-        <button 
+        <button
           style={closeButtonStyle}
           onClick={() => setShowAuthModal(false)}
         >
@@ -202,8 +229,8 @@ const AuthModal = () => {
             required
           />
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             style={buttonStyle}
             disabled={loading}
           >

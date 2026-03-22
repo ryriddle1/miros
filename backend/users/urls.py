@@ -1,6 +1,5 @@
 from django.urls import path
-from .views import RegisterView, UserProfileView
-from .serializers import CustomTokenObtainPairView
+from .views import RegisterView, UserProfileView, CustomTokenObtainPairView
 from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
