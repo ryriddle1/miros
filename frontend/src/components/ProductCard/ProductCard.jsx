@@ -55,6 +55,12 @@ const ProductCard = ({ product }) => {
     transition: 'background-color 0.3s'
   };
 
+  const featureStyle = {
+    fontSize: '12px',
+    color: '#666',
+    margin: '5px 0'
+  };
+
   return (
     <div
       style={cardStyle}
@@ -76,7 +82,14 @@ const ProductCard = ({ product }) => {
       <h3 style={titleStyle} onClick={() => navigate(`/product/${product.id}`)}>
         {product.name}
       </h3>
+
       <p style={priceStyle}>{formatPrice(product.cost)}</p>
+      {product.features && Object.keys(product.features).slice(0, 3).map(key => (
+        <p key={key} style={featureStyle}>
+          {key}: {product.features[key]}
+        </p>
+      ))}
+
       <button
         style={buttonStyle}
         onClick={handleAddToCart}

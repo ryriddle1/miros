@@ -66,6 +66,17 @@ const Product = () => {
     marginTop: '30px'
   };
 
+  const featuresStyle = {
+    marginTop: '40px',
+    borderTop: '1px solid #e0e0e0',
+    paddingTop: '20px'
+  };
+
+  const featureItemStyle = {
+    margin: '8px 0',
+    lineHeight: '1.5'
+  };
+
   if (loading) {
     return <div style={containerStyle}>Загрузка...</div>;
   }
@@ -106,6 +117,17 @@ const Product = () => {
           </div>
         </div>
       </div>
+
+      {product.features && Object.keys(product.features).length > 0 && (
+        <div style={featuresStyle}>
+          <h2>Характеристики</h2>
+          {Object.entries(product.features).map(([key, value]) => (
+            <p key={key} style={featureItemStyle}>
+              <strong>{key}:</strong> {value}
+            </p>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

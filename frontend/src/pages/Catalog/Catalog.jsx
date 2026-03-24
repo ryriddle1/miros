@@ -11,7 +11,6 @@ const Catalog = () => {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        setLoading(true);
         const data = await productsService.getProducts();
         setProducts(data);
       } catch (error) {
