@@ -1,0 +1,69 @@
+# Зависимости
+node_modules/
+venv/
+env/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Сборка
+build/
+dist/
+.next/
+out/
+*.egg-info/
+
+# React
+frontend/build/
+frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.production
+
+# Django
+backend/staticfiles/
+backend/media/
+backend/db.sqlite3
+backend/.env
+backend/__pycache__/
+
+# Логи
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Временные файлы
+*.tmp
+*.bak
+*.cache
+.coverage
+.pytest_cache/
+
+# Секреты
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+
+# Тесты
+coverage/
+htmlcov/
+.tox/
+
+# Git
+!.gitkeep
