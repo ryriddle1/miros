@@ -1,44 +1,98 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useAuth } from './AuthContext';
+import builderService from '../services/builder.service';
 
 const PCBuilderContext = createContext();
 
 export const usePCBuilder = () => {
   const context = useContext(PCBuilderContext);
-  if (!context) {
-    throw new Error('usePCBuilder должен использоваться внутри PCBuilderProvider');
-  }
+  if (!context) throw new Error('usePCBuilder must be used within PCBuilderProvider');
   return context;
+};
+
+// Вспомогательная функция: преобразовать массив компонентов в объект по типам
+const componentsArrayToObject = (componentsArray) => {
+  const obj = {
+    cpu: null,
+    motherboard: null,
+    ram: null,
+    gpu: null,
+    storage: null,
+    powerSupply: null,
+    case: null,
+    cooling: null
+  };
+  componentsArray.forEach(comp => {
+    const type = comp.features?.Тип;
+    if (type === 'Процессор') obj.cpu = comp;
+    else if (type === 'Материнская плата') obj.motherboard = comp;
+    else if (type === 'ОЗУ') obj.ram = comp;
+    else if (type === 'Видеокарта') obj.gpu = comp;
+    else if (type === 'SSD' || type === 'HDD' || type === 'SSD/HDD') obj.storage = comp;
+    else if (type === 'Блок питания') obj.powerSupply = comp;
+    else if (type === 'Корпус') obj.case = comp;
+    else if (type === 'СЖО' || type === 'Кулер' || type === 'СЖО/Кулер') obj.cooling = comp;
+  });
+  return obj;
+};
+
+// Преобразовать объект компонентов в массив id для отправки на сервер
+const componentsObjectToIds = (componentsObj) => {
+  const ids = [];
+  Object.values(componentsObj).forEach(comp => {
+    if (comp && comp.id) ids.push(comp.id);
+  });
+  return ids;
 };
 
 export const PCBuilderProvider = ({ children }) => {
   const { user } = useAuth();
-  const [builds, setBuilds] = useState([]);
+  const [components, setComponents] = useState([]); // все доступные товары
+  const [builds, setBuilds] = useState([]);        // список сохранённых сборок (с сервера)
   const [currentBuild, setCurrentBuild] = useState(null);
   const [loading, setLoading] = useState(false);
   const [aiSuggestions, setAiSuggestions] = useState(null);
 
-  // Загружаем сборки пользователя из localStorage
+  // Загружаем все компоненты (товары) из бэкенда
   useEffect(() => {
-    if (user) {
-      const savedBuilds = localStorage.getItem(`pc_builds_${user.id}`);
-      if (savedBuilds) {
-        setBuilds(JSON.parse(savedBuilds));
+    const loadComponents = async () => {
+      setLoading(true);
+      try {
+        const data = await builderService.getComponents();
+        setComponents(data);
+      } catch (err) {
+        console.error('Ошибка загрузки компонентов:', err);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
+    loadComponents();
+  }, []);
+
+  // Загружаем сборки пользователя с сервера
+  useEffect(() => {
+    const loadBuilds = async () => {
+      if (!user) {
+        setBuilds([]);
+        return;
+      }
+      setLoading(true);
+      try {
+        const data = await builderService.getBuilds();
+        setBuilds(data);
+      } catch (err) {
+        console.error('Ошибка загрузки сборок:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadBuilds();
   }, [user]);
 
-  // Сохраняем сборки в localStorage
-  useEffect(() => {
-    if (user && builds.length > 0) {
-      localStorage.setItem(`pc_builds_${user.id}`, JSON.stringify(builds));
-    }
-  }, [builds, user]);
-
-  // Создание новой сборки
+  // Создание новой сборки (локально, без отправки на сервер)
   const createBuild = (name = 'Моя сборка') => {
     const newBuild = {
-      id: Date.now(),
+      id: null, // временный id, позже будет заменён на серверный
       name,
       userId: user?.id,
       createdAt: new Date().toISOString(),
@@ -54,152 +108,156 @@ export const PCBuilderProvider = ({ children }) => {
         cooling: null
       },
       totalPrice: 0,
-      compatibility: {
-        isCompatible: true,
-        warnings: []
-      }
+      compatibility: { isCompatible: true, warnings: [] }
     };
     setCurrentBuild(newBuild);
     return newBuild;
   };
 
-  // Сохранение сборки
-  const saveBuild = (build) => {
-    setBuilds(prev => {
-      const existing = prev.find(b => b.id === build.id);
-      if (existing) {
-        return prev.map(b => b.id === build.id ? { ...build, updatedAt: new Date().toISOString() } : b);
+  // Сохранение сборки на сервере
+  const saveBuild = async (build) => {
+    if (!user) {
+      console.warn('Необходимо войти для сохранения сборки');
+      return;
+    }
+    setLoading(true);
+    try {
+      const payload = {
+        name: build.name,
+        component_ids: componentsObjectToIds(build.components)
+      };
+      let saved;
+      if (build.id) {
+        // Если есть id, обновляем существующую сборку (но у нас нет update, будем считать, что сохраняем как новую, а старую удалим?)
+        // Лучше не обновлять, а просто сохранять новую, но пока реализуем создание
+        saved = await builderService.saveBuild(payload);
       } else {
-        return [...prev, { ...build, updatedAt: new Date().toISOString() }];
+        saved = await builderService.saveBuild(payload);
       }
-    });
-  };
-
-  // Загрузка сборки
-  const loadBuild = (buildId) => {
-    const build = builds.find(b => b.id === buildId);
-    if (build) {
-      setCurrentBuild(build);
-    }
-    return build;
-  };
-
-  // Удаление сборки
-  const deleteBuild = (buildId) => {
-    setBuilds(prev => prev.filter(b => b.id !== buildId));
-    if (currentBuild?.id === buildId) {
-      setCurrentBuild(null);
+      // После сохранения добавляем полученную сборку в список
+      // (убедимся, что ответ сервера содержит полную информацию о сборке с id)
+      setBuilds(prev => [...prev, saved]);
+      setCurrentBuild(saved);
+    } catch (err) {
+      console.error('Ошибка сохранения сборки:', err);
+      alert('Не удалось сохранить сборку');
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Обновление компонента в сборке
+  // Загрузка сборки с сервера по id
+  const loadBuild = async (buildId) => {
+    setLoading(true);
+    try {
+      const build = await builderService.getBuildById(buildId);
+      // Преобразуем массив компонентов в объект по типам
+      const componentsObj = componentsArrayToObject(build.components);
+      const totalPrice = Object.values(componentsObj).reduce((sum, comp) => sum + (comp?.cost || 0), 0);
+      const loadedBuild = {
+        ...build,
+        components: componentsObj,
+        totalPrice,
+        compatibility: checkCompatibility(componentsObj)
+      };
+      setCurrentBuild(loadedBuild);
+    } catch (err) {
+      console.error('Ошибка загрузки сборки:', err);
+      alert('Не удалось загрузить сборку');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Удаление сборки с сервера
+  const deleteBuild = async (buildId) => {
+    if (!user) return;
+    setLoading(true);
+    try {
+      await builderService.deleteBuild(buildId);
+      setBuilds(prev => prev.filter(b => b.id !== buildId));
+      if (currentBuild?.id === buildId) setCurrentBuild(null);
+    } catch (err) {
+      console.error('Ошибка удаления сборки:', err);
+      alert('Не удалось удалить сборку');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Обновление компонента в текущей сборке
   const updateComponent = (componentType, component) => {
     setCurrentBuild(prev => {
       if (!prev) return prev;
-      
       const updated = {
         ...prev,
-        components: {
-          ...prev.components,
-          [componentType]: component
-        },
+        components: { ...prev.components, [componentType]: component },
         updatedAt: new Date().toISOString()
       };
-      
-      // Пересчитываем цену
-      updated.totalPrice = calculateTotalPrice(updated.components);
-      
-      // Проверяем совместимость
+      // Пересчёт цены
+      updated.totalPrice = Object.values(updated.components).reduce((sum, comp) => sum + (parseFloat(comp?.cost) || 0), 0);
       updated.compatibility = checkCompatibility(updated.components);
-      
       return updated;
     });
   };
 
-  // Расчет общей цены
-  const calculateTotalPrice = (components) => {
-    return Object.values(components).reduce((sum, comp) => {
-      return sum + (comp?.price || 0);
-    }, 0);
-  };
-
-  // Проверка совместимости (базовая версия)
+  // Проверка совместимости (расширенная)
   const checkCompatibility = (components) => {
     const warnings = [];
-    
-    // Проверка совместимости CPU и материнской платы
+    // Проверка сокета
     if (components.cpu && components.motherboard) {
-      if (components.cpu.socket !== components.motherboard.socket) {
-        warnings.push('Сокет процессора не совместим с материнской платой');
+      const cpuSocket = components.cpu.features?.['Сокет'];
+      const mbSocket = components.motherboard.features?.['Сокет'];
+      if (cpuSocket && mbSocket && cpuSocket !== mbSocket) {
+        warnings.push(`Процессор (${cpuSocket}) не совместим с материнской платой (${mbSocket})`);
       }
     }
-    
-    // Проверка оперативной памяти
+    // Проверка типа ОЗУ
     if (components.ram && components.motherboard) {
-      if (components.ram.type !== components.motherboard.ramType) {
-        warnings.push('Тип оперативной памяти не совместим с материнской платой');
+      const ramType = components.ram.features?.['Тип памяти'];
+      const mbRamType = components.motherboard.features?.['Тип памяти'];
+      if (ramType && mbRamType && ramType !== mbRamType) {
+        warnings.push(`Тип памяти ${ramType} не поддерживается материнской платой (${mbRamType})`);
       }
     }
-    
-    // Проверка блока питания
+    // Проверка мощности блока питания
     if (components.powerSupply && components.gpu) {
-      const totalPower = calculateTotalPower(components);
-      if (totalPower > components.powerSupply.wattage) {
-        warnings.push('Блок питания недостаточной мощности');
+      const psuWattage = components.powerSupply.features?.['Мощность'];
+      const gpuPower = components.gpu.features?.['Потребляемая мощность'];
+      if (psuWattage && gpuPower) {
+        const psuValue = parseInt(psuWattage);
+        const gpuValue = parseInt(gpuPower);
+        if (psuValue < gpuValue + 100) {
+          warnings.push(`Блок питания (${psuWattage} Вт) может быть недостаточен для видеокарты (${gpuPower} Вт)`);
+        }
       }
     }
-    
-    return {
-      isCompatible: warnings.length === 0,
-      warnings
-    };
+    return { isCompatible: warnings.length === 0, warnings };
   };
 
-  // Расчет энергопотребления
-  const calculateTotalPower = (components) => {
-    let total = 0;
-    if (components.cpu) total += components.cpu.tdp || 0;
-    if (components.gpu) total += components.gpu.tdp || 0;
-    if (components.ram) total += 10; // Примерно
-    if (components.storage) total += 10;
-    return total + 100; // Запас для остальных компонентов
-  };
-
-  // Запрос к нейросети (заглушка для будущего)
+  // Запрос к нейросети (заглушка, можно оставить или заменить на реальный запрос)
   const getAISuggestions = async (build) => {
     setLoading(true);
-    
-    // Здесь будет реальный запрос к нейросети
-    // Пока имитируем задержку и возвращаем тестовые данные
-    return new Promise((resolve) => {
+    try {
+      // Здесь можно вызвать builderService.getRecommendations, передав выбранные компоненты
+      // Пока заглушка
       setTimeout(() => {
-        const suggestions = {
-          cpu: {
-            name: 'AMD Ryzen 5 7600X',
-            reason: 'Лучшее соотношение цены и производительности для ваших задач'
-          },
-          gpu: {
-            name: 'NVIDIA RTX 4060 Ti',
-            reason: 'Отлично подходит для игр в 1080p и начального 1440p'
-          },
-          ram: {
-            name: 'DDR5 32GB 6000MHz',
-            reason: 'Достаточно для большинства современных игр и задач'
-          }
-        };
-        setAiSuggestions(suggestions);
+        setAiSuggestions({
+          cpu: { name: 'AMD Ryzen 5 7600X', reason: 'Лучшее соотношение цены и производительности' },
+          gpu: { name: 'NVIDIA RTX 4060 Ti', reason: 'Отлично подходит для игр в 1080p' }
+        });
         setLoading(false);
-        resolve(suggestions);
       }, 2000);
-    });
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   };
 
-  // Очистка текущей сборки
-  const clearCurrentBuild = () => {
-    setCurrentBuild(null);
-  };
+  const clearCurrentBuild = () => setCurrentBuild(null);
 
   const value = {
+    components,
     builds,
     currentBuild,
     loading,
@@ -213,9 +271,5 @@ export const PCBuilderProvider = ({ children }) => {
     clearCurrentBuild
   };
 
-  return (
-    <PCBuilderContext.Provider value={value}>
-      {children}
-    </PCBuilderContext.Provider>
-  );
+  return <PCBuilderContext.Provider value={value}>{children}</PCBuilderContext.Provider>;
 };

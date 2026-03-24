@@ -7,23 +7,45 @@ import styles from './PCBuilder.module.css';
 const PCBuilder = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { 
-    builds, 
-    currentBuild, 
+  const {
+    builds,
+    currentBuild,
     loading,
     aiSuggestions,
-    createBuild, 
-    saveBuild, 
+    components,               // список всех товаров из бэкенда
+    createBuild,
+    saveBuild,
     loadBuild,
     deleteBuild,
     updateComponent,
     getAISuggestions,
-    clearCurrentBuild 
+    clearCurrentBuild
   } = usePCBuilder();
 
   const [showSaveModal, setShowSaveModal] = useState(false);
+  const [showComponentModal, setShowComponentModal] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [buildName, setBuildName] = useState('');
   const [aiLoading, setAiLoading] = useState(false);
+
+  // Маппинг категорий (ключ -> отображаемое имя -> тип в БД)
+  const categories = [
+    { key: 'cpu', label: 'Процессор', types: ['Процессор'] },
+    { key: 'motherboard', label: 'Материнская плата', types: ['Материнская плата'] },
+    { key: 'ram', label: 'Оперативная память', types: ['ОЗУ'] },
+    { key: 'gpu', label: 'Видеокарта', types: ['Видеокарта'] },
+    { key: 'storage', label: 'Накопитель', types: ['SSD', 'HDD', 'SSD/HDD'] }, // несколько типов
+    { key: 'powerSupply', label: 'Блок питания', types: ['Блок питания'] },
+    { key: 'case', label: 'Корпус', types: ['Корпус'] },
+    { key: 'cooling', label: 'Охлаждение', types: ['СЖО', 'Кулер', 'СЖО/Кулер'] }
+  ];
+  // Фильтруем компоненты по типу для выбранной категории
+  const filteredComponents = selectedCategory
+    ? components.filter(c => {
+        const allowedTypes = categories.find(cat => cat.key === selectedCategory)?.types || [];
+        return allowedTypes.includes(c.features?.Тип);
+      })
+    : [];
 
   // Если пользователь не авторизован
   if (!user) {
@@ -32,10 +54,7 @@ const PCBuilder = () => {
         <div className={styles.unauthorized}>
           <h2>🔒 Требуется авторизация</h2>
           <p>Для использования конструктора ПК необходимо войти в аккаунт</p>
-          <button 
-            className={styles.loginButton}
-            onClick={() => navigate('/')}
-          >
+          <button className={styles.loginButton} onClick={() => navigate('/')}>
             Вернуться на главную
           </button>
         </div>
@@ -61,8 +80,21 @@ const PCBuilder = () => {
     }
   };
 
+  const openComponentModal = (categoryKey) => {
+    setSelectedCategory(categoryKey);
+    setShowComponentModal(true);
+  };
+
+  const handleSelectComponent = (component) => {
+    if (selectedCategory) {
+      updateComponent(selectedCategory, component);
+      setShowComponentModal(false);
+      setSelectedCategory(null);
+    }
+  };
+
   const formatPrice = (price) => {
-    return new Intl.NumberFormat('ru-RU').format(price || 0) + ' ₽';
+    return new Intl.NumberFormat('ru-RU').format(parseFloat(price) || 0) + ' ₽';
   };
 
   return (
@@ -80,17 +112,11 @@ const PCBuilder = () => {
           <div className={styles.panelHeader}>
             <h2>Компоненты</h2>
             <div className={styles.headerActions}>
-              <button 
-                className={styles.newBuildButton}
-                onClick={() => createBuild()}
-              >
+              <button className={styles.newBuildButton} onClick={() => createBuild()}>
                 Новая сборка
               </button>
               {currentBuild && (
-                <button 
-                  className={styles.saveBuildButton}
-                  onClick={() => setShowSaveModal(true)}
-                >
+                <button className={styles.saveBuildButton} onClick={() => setShowSaveModal(true)}>
                   💾 Сохранить
                 </button>
               )}
@@ -99,157 +125,37 @@ const PCBuilder = () => {
 
           {currentBuild ? (
             <div className={styles.componentsList}>
-              {/* Процессор */}
-              <div className={styles.componentItem}>
-                <div className={styles.componentHeader}>
-                  <span className={styles.componentName}>Процессор</span>
-                  <button className={styles.selectButton}>Выбрать</button>
-                </div>
-                {currentBuild.components.cpu ? (
-                  <div className={styles.selectedComponent}>
-                    <span>{currentBuild.components.cpu.name}</span>
-                    <span className={styles.componentPrice}>
-                      {formatPrice(currentBuild.components.cpu.price)}
-                    </span>
+              {categories.map(cat => {
+                const selectedComp = currentBuild.components[cat.key];
+                return (
+                  <div key={cat.key} className={styles.componentItem}>
+                    <div className={styles.componentHeader}>
+                      <span className={styles.componentName}>{cat.label}</span>
+                      <button
+                        className={styles.selectButton}
+                        onClick={() => openComponentModal(cat.key)}
+                      >
+                        Выбрать
+                      </button>
+                    </div>
+                    {selectedComp ? (
+                      <div className={styles.selectedComponent}>
+                        <span>{selectedComp.name}</span>
+                        <span className={styles.componentPrice}>
+                          {formatPrice(selectedComp.cost)}
+                        </span>
+                      </div>
+                    ) : (
+                      <div className={styles.emptyComponent}>Не выбран</div>
+                    )}
                   </div>
-                ) : (
-                  <div className={styles.emptyComponent}>Не выбран</div>
-                )}
-              </div>
-
-              {/* Материнская плата */}
-              <div className={styles.componentItem}>
-                <div className={styles.componentHeader}>
-                  <span className={styles.componentName}>Материнская плата</span>
-                  <button className={styles.selectButton}>Выбрать</button>
-                </div>
-                {currentBuild.components.motherboard ? (
-                  <div className={styles.selectedComponent}>
-                    <span>{currentBuild.components.motherboard.name}</span>
-                    <span className={styles.componentPrice}>
-                      {formatPrice(currentBuild.components.motherboard.price)}
-                    </span>
-                  </div>
-                ) : (
-                  <div className={styles.emptyComponent}>Не выбрана</div>
-                )}
-              </div>
-
-              {/* Оперативная память */}
-              <div className={styles.componentItem}>
-                <div className={styles.componentHeader}>
-                  <span className={styles.componentName}>Оперативная память</span>
-                  <button className={styles.selectButton}>Выбрать</button>
-                </div>
-                {currentBuild.components.ram ? (
-                  <div className={styles.selectedComponent}>
-                    <span>{currentBuild.components.ram.name}</span>
-                    <span className={styles.componentPrice}>
-                      {formatPrice(currentBuild.components.ram.price)}
-                    </span>
-                  </div>
-                ) : (
-                  <div className={styles.emptyComponent}>Не выбрана</div>
-                )}
-              </div>
-
-              {/* Видеокарта */}
-              <div className={styles.componentItem}>
-                <div className={styles.componentHeader}>
-                  <span className={styles.componentName}>Видеокарта</span>
-                  <button className={styles.selectButton}>Выбрать</button>
-                </div>
-                {currentBuild.components.gpu ? (
-                  <div className={styles.selectedComponent}>
-                    <span>{currentBuild.components.gpu.name}</span>
-                    <span className={styles.componentPrice}>
-                      {formatPrice(currentBuild.components.gpu.price)}
-                    </span>
-                  </div>
-                ) : (
-                  <div className={styles.emptyComponent}>Не выбрана</div>
-                )}
-              </div>
-
-              {/* Накопитель */}
-              <div className={styles.componentItem}>
-                <div className={styles.componentHeader}>
-                  <span className={styles.componentName}>Накопитель</span>
-                  <button className={styles.selectButton}>Выбрать</button>
-                </div>
-                {currentBuild.components.storage ? (
-                  <div className={styles.selectedComponent}>
-                    <span>{currentBuild.components.storage.name}</span>
-                    <span className={styles.componentPrice}>
-                      {formatPrice(currentBuild.components.storage.price)}
-                    </span>
-                  </div>
-                ) : (
-                  <div className={styles.emptyComponent}>Не выбран</div>
-                )}
-              </div>
-
-              {/* Блок питания */}
-              <div className={styles.componentItem}>
-                <div className={styles.componentHeader}>
-                  <span className={styles.componentName}>Блок питания</span>
-                  <button className={styles.selectButton}>Выбрать</button>
-                </div>
-                {currentBuild.components.powerSupply ? (
-                  <div className={styles.selectedComponent}>
-                    <span>{currentBuild.components.powerSupply.name}</span>
-                    <span className={styles.componentPrice}>
-                      {formatPrice(currentBuild.components.powerSupply.price)}
-                    </span>
-                  </div>
-                ) : (
-                  <div className={styles.emptyComponent}>Не выбран</div>
-                )}
-              </div>
-
-              {/* Корпус */}
-              <div className={styles.componentItem}>
-                <div className={styles.componentHeader}>
-                  <span className={styles.componentName}>Корпус</span>
-                  <button className={styles.selectButton}>Выбрать</button>
-                </div>
-                {currentBuild.components.case ? (
-                  <div className={styles.selectedComponent}>
-                    <span>{currentBuild.components.case.name}</span>
-                    <span className={styles.componentPrice}>
-                      {formatPrice(currentBuild.components.case.price)}
-                    </span>
-                  </div>
-                ) : (
-                  <div className={styles.emptyComponent}>Не выбран</div>
-                )}
-              </div>
-
-              {/* Охлаждение */}
-              <div className={styles.componentItem}>
-                <div className={styles.componentHeader}>
-                  <span className={styles.componentName}>Охлаждение</span>
-                  <button className={styles.selectButton}>Выбрать</button>
-                </div>
-                {currentBuild.components.cooling ? (
-                  <div className={styles.selectedComponent}>
-                    <span>{currentBuild.components.cooling.name}</span>
-                    <span className={styles.componentPrice}>
-                      {formatPrice(currentBuild.components.cooling.price)}
-                    </span>
-                  </div>
-                ) : (
-                  <div className={styles.emptyComponent}>Не выбрано</div>
-                )}
-              </div>
+                );
+              })}
             </div>
           ) : (
             <div className={styles.emptyBuild}>
               <p>Начните новую сборку или загрузите сохраненную</p>
-              <button 
-                className={styles.startBuildButton}
-                onClick={() => createBuild()}
-              >
+              <button className={styles.startBuildButton} onClick={() => createBuild()}>
                 Начать сборку
               </button>
             </div>
@@ -268,11 +174,11 @@ const PCBuilder = () => {
               {/* Совместимость */}
               <div className={styles.compatibility}>
                 <h3>✅ Совместимость</h3>
-                {currentBuild.compatibility.isCompatible ? (
+                {currentBuild.compatibility?.isCompatible ? (
                   <p className={styles.compatible}>Все компоненты совместимы</p>
                 ) : (
                   <div className={styles.warnings}>
-                    {currentBuild.compatibility.warnings.map((warning, index) => (
+                    {currentBuild.compatibility?.warnings?.map((warning, index) => (
                       <p key={index} className={styles.warning}>⚠️ {warning}</p>
                     ))}
                   </div>
@@ -282,14 +188,13 @@ const PCBuilder = () => {
               {/* Нейросеть */}
               <div className={styles.aiSection}>
                 <h3>🤖 Нейросеть рекомендует</h3>
-                <button 
+                <button
                   className={styles.aiButton}
                   onClick={handleAISuggestions}
                   disabled={aiLoading}
                 >
                   {aiLoading ? 'Анализ...' : 'Получить рекомендации'}
                 </button>
-
                 {aiSuggestions && (
                   <div className={styles.aiSuggestions}>
                     {Object.entries(aiSuggestions).map(([key, suggestion]) => (
@@ -314,13 +219,13 @@ const PCBuilder = () => {
                           <span>{formatPrice(build.totalPrice)}</span>
                         </div>
                         <div className={styles.buildActions}>
-                          <button 
+                          <button
                             className={styles.loadBuildButton}
                             onClick={() => loadBuild(build.id)}
                           >
                             Загрузить
                           </button>
-                          <button 
+                          <button
                             className={styles.deleteBuildButton}
                             onClick={() => deleteBuild(build.id)}
                           >
@@ -346,20 +251,43 @@ const PCBuilder = () => {
               type="text"
               placeholder="Название сборки"
               value={buildName}
-              onChange={(e) => setBuildName(e.target.value)}
+              onChange={e => setBuildName(e.target.value)}
               className={styles.modalInput}
             />
             <div className={styles.modalActions}>
-              <button 
-                className={styles.modalSaveButton}
-                onClick={handleSaveBuild}
-              >
+              <button className={styles.modalSaveButton} onClick={handleSaveBuild}>
                 Сохранить
               </button>
-              <button 
-                className={styles.modalCancelButton}
-                onClick={() => setShowSaveModal(false)}
-              >
+              <button className={styles.modalCancelButton} onClick={() => setShowSaveModal(false)}>
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Модальное окно выбора компонента */}
+      {showComponentModal && selectedCategory && (
+        <div className={styles.modalOverlay} onClick={() => setShowComponentModal(false)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <h3>Выберите {categories.find(cat => cat.key === selectedCategory)?.label}</h3>
+            <div className={styles.componentsListModal}>
+              {filteredComponents.length === 0 ? (
+                <p>Нет доступных компонентов этой категории</p>
+              ) : (
+                filteredComponents.map(comp => (
+                  <div key={comp.id} className={styles.componentOption} onClick={() => handleSelectComponent(comp)}>
+                    <div>
+                      <strong>{comp.name}</strong>
+                      <div className={styles.componentOptionPrice}>{formatPrice(comp.cost)}</div>
+                    </div>
+                    <button className={styles.selectOptionButton}>Выбрать</button>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className={styles.modalActions}>
+              <button className={styles.modalCancelButton} onClick={() => setShowComponentModal(false)}>
                 Отмена
               </button>
             </div>

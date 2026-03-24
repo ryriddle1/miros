@@ -37,6 +37,11 @@ class PCBuilderService {
     const response = await api.post(`builder/builds/${id}/add-to-cart/`);
     return response.data;
   }
+  
+  async deleteBuild(id) {
+    const response = await api.delete(`builder/builds/${id}/`);
+    return response.data;
+  }
 
   // Получение рекомендаций от нейросети
   async getRecommendations(purpose, budget) {
