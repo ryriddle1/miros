@@ -63,11 +63,11 @@ const Catalog = () => {
   };
 
   const productsGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    gap: '20px',
-    justifyContent: 'center'
-  };
+  display: 'grid',
+  gridTemplateColumns: 'repeat(3, 1fr)',  // ← 3 колонки
+  gap: '20px',
+  width: '100%'
+};
 
   if (loading) {
     return <div style={containerStyle}>Загрузка товаров...</div>;
