@@ -15,6 +15,7 @@ import Service from './pages/Service/Service';
 import ServiceDetail from './pages/Service/ServiceDetail';
 import PCBuilder from './pages/PCBuilder/PCBuilder'; 
 import AuthModal from './components/AuthModal/AuthModal';
+import About from './pages/About/About';
 import './index.css';
 
 const AppContent = () => {
@@ -31,6 +32,7 @@ const AppContent = () => {
         <Route path="/service" element={<Service />} />
         <Route path="/service/:id" element={<ServiceDetail />} />
         <Route path="/pc-builder" element={<PCBuilder />} /> 
+        <Route path="/about" element={<About />} />
       </Routes>
       <Footer /> 
     </>

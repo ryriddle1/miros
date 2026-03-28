@@ -17,19 +17,6 @@ const Footer = () => {
               <h4>Информация</h4>
               <ul>
                 <li><a href="/about">О нас</a></li>
-                <li><a href="/delivery">Доставка</a></li>
-                <li><a href="/payment">Оплата</a></li>
-                <li><a href="/returns">Возврат</a></li>
-              </ul>
-            </div>
-            
-            <div className={styles.column}>
-              <h4>Помощь</h4>
-              <ul>
-                <li><a href="/faq">FAQ</a></li>
-                <li><a href="/contacts">Контакты</a></li>
-                <li><a href="/service">Сервисный центр</a></li>
-                <li><a href="/warranty">Гарантия</a></li>
               </ul>
             </div>
             

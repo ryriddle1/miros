@@ -1,17 +1,29 @@
-import React from 'react';
+//import React from 'react';
+import React, { useState } from 'react';
 import { useCart } from '../../context/CartContext';
 import { useNavigate } from 'react-router-dom';
+import CheckoutModal from '../../components/CheckoutModal/CheckoutModal';
 
 const Cart = () => {
-  const {
-    cart,
-    removeFromCart,
-    updateQuantity,
-    clearCart,
-    getTotalPrice,
-    formatPrice
-  } = useCart();
+  const { cart, removeFromCart, updateQuantity, clearCart, getTotalPrice, formatPrice } = useCart();
   const navigate = useNavigate();
+  const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+
+  const handleCheckout = () => {
+    if (cart.length === 0) {
+      alert('Корзина пуста');
+      return;
+    }
+    setShowCheckoutModal(true);
+  };
+
+  const handleOrderSuccess = () => {
+    clearCart(); // очищаем корзину
+    setShowCheckoutModal(false);
+    alert('Заказ успешно оформлен! Спасибо за покупку!');
+    // опционально: редирект на страницу заказов или на главную
+    navigate('/profile'); // если у вас есть страница профиля с заказами
+  };
 
   const containerStyle = {
     maxWidth: '1000px',
@@ -232,12 +244,12 @@ const Cart = () => {
           >
             Продолжить покупки
           </button>
-          <button
-            style={checkoutButtonStyle}
-            onClick={() => navigate('/checkout')}
-          >
-            Оформить заказ
-          </button>
+          <button onClick={handleCheckout}>Оформить заказ</button>
+          <CheckoutModal
+            isOpen={showCheckoutModal}
+            onClose={() => setShowCheckoutModal(false)}
+            onSuccess={handleOrderSuccess}
+          />
         </div>
       </div>
     </div>
