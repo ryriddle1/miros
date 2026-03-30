@@ -32,7 +32,7 @@
   margin-bottom: 2rem;
   flex-wrap: wrap;
   gap: 1rem;
-  background: white;
+  background: rgb(229, 255, 220);
   padding: 1.5rem;
   border-radius: 15px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
@@ -73,7 +73,7 @@
 
 .sortSelect {
   padding: 0.8rem 2rem 0.8rem 1.2rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #cbfec5;
   border-radius: 25px;
   font-size: 1rem;
   background: #f8f9fa;
@@ -106,7 +106,7 @@
 .loadingSpinner {
   width: 50px;
   height: 50px;
-  border: 5px solid #f3f3f3;
+  border: 5px solid #cdf9c5;
   border-top: 5px solid #1e8449;
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -121,7 +121,7 @@
 .noResults {
   text-align: center;
   padding: 4rem;
-  background: white;
+  background: rgb(216, 255, 206);
   border-radius: 15px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
 }
@@ -140,7 +140,7 @@
 .resetButton {
   padding: 0.8rem 2rem;
   background: linear-gradient(135deg, #1e8449 0%, #0e6251 100%);
-  color: white;
+  color: rgb(219, 246, 212);
   border: none;
   border-radius: 25px;
   cursor: pointer;

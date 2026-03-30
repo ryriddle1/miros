@@ -62,7 +62,7 @@ const Header = () => {
                 isActive ? `${styles.navLink} ${styles.activeNavLink}` : styles.navLink
               }
             >
-               {user.name}
+               Профиль
             </NavLink>
           )}
 

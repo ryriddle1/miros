@@ -5,7 +5,7 @@
   justify-content: center;
   text-align: center;
   background: linear-gradient(135deg, #1e8449 0%, #0e6251 100%);
-  color: white;
+  color: rgb(181, 247, 168);
   position: relative;
   overflow: hidden;
 }
@@ -45,7 +45,7 @@
 .ctaButton {
   padding: 1rem 3rem;
   font-size: 1.2rem;
-  background: white;
+  background: rgb(195, 247, 201);
   color: #1e8449;
   border: none;
   border-radius: 50px;
@@ -116,7 +116,7 @@
 
 .features {
   padding: 5rem 2rem;
-  background: white;
+  background: rgb(218, 246, 213);
   position: relative;
   z-index: 20;
 }
@@ -140,7 +140,7 @@
 .featureCard {
   text-align: center;
   padding: 2rem;
-  background: #f8f9fa;
+  background: #d1f4d7;
   border-radius: 15px;
   transition: all 0.3s ease;
   animation: fadeIn 0.5s ease-out;

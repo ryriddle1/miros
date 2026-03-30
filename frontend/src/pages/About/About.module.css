@@ -7,7 +7,7 @@
 .content {
   max-width: 1000px;
   margin: 0 auto;
-  background: white;
+  background: rgb(230, 255, 227);
   border-radius: 20px;
   padding: 2rem;
   box-shadow: 0 4px 20px rgba(0,0,0,0.05);
@@ -31,7 +31,7 @@
 .section {
   margin-top: 2rem;
   padding-top: 1rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid #e6ffdf;
 }
 
 .section h2 {
@@ -52,7 +52,7 @@
   text-align: center;
   width: 200px;
   padding: 1rem;
-  background: #f8f9fa;
+  background: #daffd5;
   border-radius: 12px;
   transition: transform 0.2s;
 }
@@ -102,7 +102,7 @@
 
 .socialLinks a {
   background: #1e8449;
-  color: white;
+  color: rgb(250, 250, 250);
   padding: 0.5rem 1rem;
   border-radius: 8px;
   text-decoration: none;

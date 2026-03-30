@@ -1,6 +1,6 @@
 .footer {
   background: linear-gradient(135deg, #1a2a1a 0%, #0e2a1a 100%);
-  color: #fff;
+  color: #bef7b9;
   margin-top: auto;
   position: relative;
   z-index: 10;
@@ -48,7 +48,7 @@
 .column li {
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
-  color: #ccc;
+  color: #caf1b8;
 }
 
 .column a {

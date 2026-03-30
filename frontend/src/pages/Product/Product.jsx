@@ -68,7 +68,7 @@ const Product = () => {
 
   const featuresStyle = {
     marginTop: '40px',
-    borderTop: '2px solid #e0e0e0',
+    borderTop: '2px solid #d8ffca',
     paddingTop: '30px'
   };
 
@@ -82,7 +82,7 @@ const Product = () => {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
     gap: '15px',
-    backgroundColor: '#f8f9fa',
+    backgroundColor: '#ddf9e1',
     padding: '20px',
     borderRadius: '12px'
   };

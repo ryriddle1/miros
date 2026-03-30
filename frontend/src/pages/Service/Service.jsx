@@ -94,7 +94,7 @@ const Service = () => {
       <div className={styles.header}>
         <h1 className={styles.title}>🔧 Сервисный центр</h1>
         <p className={styles.subtitle}>
-          {user?.name}, здесь вы можете отслеживать свои заявки на ремонт
+          {user?.name} Здесь вы можете отслеживать свои заявки на ремонт
         </p>
       </div>
 
