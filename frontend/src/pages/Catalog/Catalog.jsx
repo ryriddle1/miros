@@ -64,7 +64,7 @@ const Catalog = () => {
 
   const productsGridStyle = {
   display: 'grid',
-  gridTemplateColumns: 'repeat(3, 1fr)',  // ← 3 колонки
+  gridTemplateColumns: 'repeat(4, 1fr)',  // ← 3 колонки
   gap: '20px',
   width: '100%'
 };
