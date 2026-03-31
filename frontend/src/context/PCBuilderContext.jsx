@@ -79,7 +79,12 @@ export const PCBuilderProvider = ({ children }) => {
       setLoading(true);
       try {
         const data = await builderService.getBuilds();
-        setBuilds(data);
+        // Преобразуем total_price в число и добавляем поле totalPrice
+        const formattedBuilds = data.map(build => ({
+          ...build,
+          totalPrice: parseFloat(build.total_price) || 0
+        }));
+        setBuilds(formattedBuilds);
       } catch (err) {
         console.error('Ошибка загрузки сборок:', err);
       } finally {
@@ -126,18 +131,14 @@ export const PCBuilderProvider = ({ children }) => {
         name: build.name,
         component_ids: componentsObjectToIds(build.components)
       };
-      let saved;
-      if (build.id) {
-        // Если есть id, обновляем существующую сборку (но у нас нет update, будем считать, что сохраняем как новую, а старую удалим?)
-        // Лучше не обновлять, а просто сохранять новую, но пока реализуем создание
-        saved = await builderService.saveBuild(payload);
-      } else {
-        saved = await builderService.saveBuild(payload);
-      }
-      // После сохранения добавляем полученную сборку в список
-      // (убедимся, что ответ сервера содержит полную информацию о сборке с id)
-      setBuilds(prev => [...prev, saved]);
-      setCurrentBuild(saved);
+      const saved = await builderService.saveBuild(payload);
+      const savedBuild = {
+        ...saved,
+        totalPrice: parseFloat(saved.total_price) || 0,
+        total_price: undefined // убираем строковую версию, чтобы не путаться
+      };
+      setBuilds(prev => [...prev, savedBuild]);
+      setCurrentBuild(savedBuild);
     } catch (err) {
       console.error('Ошибка сохранения сборки:', err);
       alert('Не удалось сохранить сборку');
@@ -151,9 +152,11 @@ export const PCBuilderProvider = ({ children }) => {
     setLoading(true);
     try {
       const build = await builderService.getBuildById(buildId);
-      // Преобразуем массив компонентов в объект по типам
       const componentsObj = componentsArrayToObject(build.components);
-      const totalPrice = Object.values(componentsObj).reduce((sum, comp) => sum + (comp?.cost || 0), 0);
+      // Преобразуем cost в число при подсчёте
+      const totalPrice = Object.values(componentsObj).reduce((sum, comp) => {
+        return sum + (comp ? parseFloat(comp.cost) : 0);
+      }, 0);
       const loadedBuild = {
         ...build,
         components: componentsObj,
@@ -168,7 +171,6 @@ export const PCBuilderProvider = ({ children }) => {
       setLoading(false);
     }
   };
-
   // Удаление сборки с сервера
   const deleteBuild = async (buildId) => {
     if (!user) return;
@@ -194,8 +196,10 @@ export const PCBuilderProvider = ({ children }) => {
         components: { ...prev.components, [componentType]: component },
         updatedAt: new Date().toISOString()
       };
-      // Пересчёт цены
-      updated.totalPrice = Object.values(updated.components).reduce((sum, comp) => sum + (parseFloat(comp?.cost) || 0), 0);
+      // Пересчёт цены с преобразованием в число
+      updated.totalPrice = Object.values(updated.components).reduce((sum, comp) => {
+        return sum + (comp ? parseFloat(comp.cost) : 0);
+      }, 0);
       updated.compatibility = checkCompatibility(updated.components);
       return updated;
     });
