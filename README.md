@@ -1,7 +1,3 @@
-Вот **оформленное и структурированное описание** для README.md на GitHub с использованием визуальных элементов, бейджей и эмодзи:
-
----
-
 # 🍋 miros — интернет-магазин компьютерной техники
 
 [![React](https://img.shields.io/badge/React-18-blue.svg?logo=react&logoColor=white)](https://reactjs.org/)
